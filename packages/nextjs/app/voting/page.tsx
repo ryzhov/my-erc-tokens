@@ -1,7 +1,9 @@
+import Voting from "./_components/Voting";
+
 export default function Page() {
   return (
     <>
-      <h1>Voting Page</h1>
+      <Voting />
     </>
   );
 }
