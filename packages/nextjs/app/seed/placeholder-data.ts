@@ -1,76 +1,77 @@
-// const shareholders = [
-//   {
-//     id: '410544b2-4001-4271-9855-fec4b6a6442a',
-//     name: 'User',
-//     email: 'user@nextmail.com',
-//     password: '123456',
-//   },
-// ];
+const shareholders = [
+  {
+    id: "410544b2-4001-4271-9855-fec4b6a6442a",
+    name: "User",
+    email: "user@nextmail.com",
+    password: "123456",
+  },
+];
 
-// const questions = [
-//   {
-//     id: 0,
-//     question: 'Do you enjoy this voting application?',
-//     is_active: 1
-//   },
-//   {
-//     id: 1,
-//     question: 'Who will be Chief Executive Officer in 2025?',
-//     is_active: 1
-//   },
-//   {
-//     id: 2,
-//     question: 'Do you approve the financial report?',
-//     is_active: 1
-//   }
-// ]
+const questions = [
+  {
+    id: 0,
+    question: "Do you enjoy this voting application?",
+    is_active: 1,
+  },
+  {
+    id: 1,
+    question: "Who will be Chief Executive Officer in 2025?",
+    is_active: 1,
+  },
+  {
+    id: 2,
+    question: "Do you approve this financial report?",
+    is_active: 1,
+  },
+];
 
-// const question_choices = [
-//   {
-//     id: 0,
-//     question_id: questions[0].id,
-//     choice: 'Yes'
-//   },
-//   {
-//     id: 1,
-//     question_id: questions[0].id,
-//     choice: 'No'
-//   },
-//   {
-//     id: 2,
-//     question_id: questions[1].id,
-//     choice: 'Donald Duck'
-//   },
-//   {
-//     id: 3,
-//     question_id: questions[1].id,
-//     choice: 'John Smith'
-//   },
-//   {
-//     id: 4,
-//     question_id: questions[1].id,
-//     choice: 'Billy Bones'
-//   },
-//   {
-//     id: 5,
-//     question_id: questions[2].id,
-//     choice: 'Yes'
-//   },
-//   {
-//     id: 6,
-//     question_id: questions[2].id,
-//     choice: 'No'
-//   },
-// ]
+const question_choices = [
+  {
+    id: 0,
+    question_id: questions[0].id,
+    choice: "Yes",
+  },
+  {
+    id: 1,
+    question_id: questions[0].id,
+    choice: "No",
+  },
+  {
+    id: 2,
+    question_id: questions[1].id,
+    choice: "Donald Duck",
+  },
+  {
+    id: 3,
+    question_id: questions[1].id,
+    choice: "John Smith",
+  },
+  {
+    id: 4,
+    question_id: questions[1].id,
+    choice: "Billy Bones",
+  },
+  {
+    id: 5,
+    question_id: questions[2].id,
+    choice: "Yes",
+  },
+  {
+    id: 6,
+    question_id: questions[2].id,
+    choice: "No",
+  },
+];
 
-// const shareholder_question_answers = [
-//   {
-//     sh_id: shareholders[0].id,
-//     q_id: question_choices[0].id,
-//     chice_id: question_choices[0].id,
-//     answer_time: '2024-12-8'
-//   }
-// ]
+const shareholder_question_answers = [
+  {
+    id: 0,
+    sh_id: shareholders[0].id,
+    q_id: question_choices[0].id,
+    choice_id: question_choices[0].id,
+    answer_time: "2024-12-8 12-34",
+  },
+];
 
 const users = [
   {
@@ -216,4 +217,4 @@ const revenue = [
   { month: "Dec", revenue: 4800 },
 ];
 
-export { users, customers, invoices, revenue };
+export { users, customers, invoices, revenue, shareholders, questions, question_choices, shareholder_question_answers };

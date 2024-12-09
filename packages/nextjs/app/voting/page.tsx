@@ -1,9 +1,9 @@
-import Voting from "./_components/Voting";
+import VotingRadio from "./_components/VotingRadio";
 
 export default function Page() {
   return (
     <>
-      <Voting />
+      <VotingRadio />
     </>
   );
 }

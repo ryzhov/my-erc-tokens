@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const Voting = () => {
+const UpDownVoting = () => {
   // Initialize state to keep track of vote counts
   const [voteCount, setVoteCount] = useState(0);
 
@@ -34,4 +34,4 @@ const Voting = () => {
   );
 };
 
-export default Voting;
+export default UpDownVoting;

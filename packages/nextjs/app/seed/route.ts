@@ -1,8 +1,116 @@
-import { customers, invoices, revenue, users } from "./placeholder-data";
+import {
+  customers,
+  invoices,
+  question_choices,
+  questions,
+  revenue,
+  shareholder_question_answers,
+  shareholders,
+  users,
+} from "./placeholder-data";
 import { db } from "@vercel/postgres";
 import bcrypt from "bcrypt";
 
 const client = await db.connect();
+
+async function seedShareholders() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS shareholders (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL
+    );
+  `;
+
+  const insertedShareholders = await Promise.all(
+    shareholders.map(async sholder => {
+      const hashedPassword = await bcrypt.hash(sholder.password, 10);
+      return client.sql`
+        INSERT INTO shareholders (id, name, email, password)
+        VALUES (${sholder.id}, ${sholder.name}, ${sholder.email}, ${hashedPassword})
+        ON CONFLICT (id) DO NOTHING;
+      `;
+    }),
+  );
+
+  return insertedShareholders;
+}
+
+async function seedQuestions() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS questions (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      question VARCHAR(255) NOT NULL,
+      is_active INT NOT NULL
+    );
+  `;
+
+  const insertedQuestions = await Promise.all(
+    questions.map(
+      question => client.sql`
+        INSERT INTO questions (id, question, is_active)
+        VALUES (${question.id}, ${question.question}, ${question.is_active} )
+        ON CONFLICT (id) DO NOTHING;
+      `,
+    ),
+  );
+
+  return insertedQuestions;
+}
+
+async function seedChoices() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS choices (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      question_id UUID NOT NULL,
+      choice VARCHAR(255) NOT NULL,
+    );
+  `;
+
+  const insertedChoices = await Promise.all(
+    question_choices.map(
+      choice => client.sql`
+        INSERT INTO choices (id, question_id, choice)
+        VALUES (${choice.id}, ${choice.question_id}, ${choice.choice} )
+        ON CONFLICT (id) DO NOTHING;
+      `,
+    ),
+  );
+
+  return insertedChoices;
+}
+
+async function seedShareholderAnswers() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS answers (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      sh_id UUID NOT NULL,
+      question_id UUID NOT NULL,
+      choice_id VARCHAR(255) NOT NULL,
+      answer_time TIMESTAMP NOT NULL
+    );
+  `;
+
+  const insertedAnswers = await Promise.all(
+    shareholder_question_answers.map(
+      answer => client.sql`
+        INSERT INTO answers (id, sh_id, question_id, choice_id, answer_time)
+        VALUES (${answer.id}, ${answer.q_id}, ${answer.choice_id}, to_timestamp(${Date.now()} / 1000.0) )
+        ON CONFLICT (id) DO NOTHING;
+      `,
+    ),
+  );
+
+  return insertedAnswers;
+}
 
 async function seedUsers() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -108,6 +216,10 @@ export async function GET() {
   // });
   try {
     await client.sql`BEGIN`;
+    await seedShareholders();
+    await seedQuestions();
+    await seedChoices();
+    await seedShareholderAnswers();
     await seedUsers();
     await seedCustomers();
     await seedInvoices();
