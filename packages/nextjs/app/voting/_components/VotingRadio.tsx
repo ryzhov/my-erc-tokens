@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { fetchQuestions } from "~~/app/lib/data";
 
 const questions = [
   {
@@ -12,6 +13,9 @@ const questions = [
     ],
   },
 ];
+
+const db_questions = fetchQuestions();
+console.log(db_questions);
 
 function VotingRadio() {
   const [checkBox, setCheckBox] = useState();

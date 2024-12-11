@@ -1,15 +1,7 @@
-import {
-  customers,
-  invoices,
-  question_choices,
-  questions,
-  revenue,
-  shareholder_question_answers,
-  shareholders,
-  users,
-} from "./placeholder-data";
+import { question_choices, questions, shareholder_question_answers, shareholders } from "./placeholder-data";
+import { sha256 } from "@noble/hashes/sha2";
+import { bytesToHex } from "@noble/hashes/utils";
 import { db } from "@vercel/postgres";
-import bcrypt from "bcrypt";
 
 const client = await db.connect();
 
@@ -26,7 +18,7 @@ async function seedShareholders() {
 
   const insertedShareholders = await Promise.all(
     shareholders.map(async sholder => {
-      const hashedPassword = await bcrypt.hash(sholder.password, 10);
+      const hashedPassword = bytesToHex(sha256(sholder.password));
       return client.sql`
         INSERT INTO shareholders (id, name, email, password)
         VALUES (${sholder.id}, ${sholder.name}, ${sholder.email}, ${hashedPassword})
@@ -69,7 +61,7 @@ async function seedChoices() {
     CREATE TABLE IF NOT EXISTS choices (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       question_id UUID NOT NULL,
-      choice VARCHAR(255) NOT NULL,
+      choice TEXT NOT NULL
     );
   `;
 
@@ -77,7 +69,7 @@ async function seedChoices() {
     question_choices.map(
       choice => client.sql`
         INSERT INTO choices (id, question_id, choice)
-        VALUES (${choice.id}, ${choice.question_id}, ${choice.choice} )
+        VALUES (${choice.id}, ${choice.question_id}, ${choice.text} )
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
@@ -103,110 +95,13 @@ async function seedShareholderAnswers() {
     shareholder_question_answers.map(
       answer => client.sql`
         INSERT INTO answers (id, sh_id, question_id, choice_id, answer_time)
-        VALUES (${answer.id}, ${answer.q_id}, ${answer.choice_id}, to_timestamp(${Date.now()} / 1000.0) )
+        VALUES (${answer.id}, ${answer.sh_id}, ${answer.q_id}, ${answer.choice_id}, now() )
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
   );
 
   return insertedAnswers;
-}
-
-async function seedUsers() {
-  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS users (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
-    );
-  `;
-
-  const insertedUsers = await Promise.all(
-    users.map(async user => {
-      const hashedPassword = await bcrypt.hash(user.password, 10);
-      return client.sql`
-        INSERT INTO users (id, name, email, password)
-        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
-        ON CONFLICT (id) DO NOTHING;
-      `;
-    }),
-  );
-
-  return insertedUsers;
-}
-
-async function seedInvoices() {
-  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS invoices (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      customer_id UUID NOT NULL,
-      amount INT NOT NULL,
-      status VARCHAR(255) NOT NULL,
-      date DATE NOT NULL
-    );
-  `;
-
-  const insertedInvoices = await Promise.all(
-    invoices.map(
-      invoice => client.sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
-  );
-
-  return insertedInvoices;
-}
-
-async function seedCustomers() {
-  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS customers (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      image_url VARCHAR(255) NOT NULL
-    );
-  `;
-
-  const insertedCustomers = await Promise.all(
-    customers.map(
-      customer => client.sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
-  );
-
-  return insertedCustomers;
-}
-
-async function seedRevenue() {
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS revenue (
-      month VARCHAR(4) NOT NULL UNIQUE,
-      revenue INT NOT NULL
-    );
-  `;
-
-  const insertedRevenue = await Promise.all(
-    revenue.map(
-      rev => client.sql`
-        INSERT INTO revenue (month, revenue)
-        VALUES (${rev.month}, ${rev.revenue})
-        ON CONFLICT (month) DO NOTHING;
-      `,
-    ),
-  );
-
-  return insertedRevenue;
 }
 
 export async function GET() {
@@ -220,10 +115,6 @@ export async function GET() {
     await seedQuestions();
     await seedChoices();
     await seedShareholderAnswers();
-    await seedUsers();
-    await seedCustomers();
-    await seedInvoices();
-    await seedRevenue();
     await client.sql`COMMIT`;
 
     return Response.json({ message: "Database seeded successfully" });
