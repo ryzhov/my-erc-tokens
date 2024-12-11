@@ -1,24 +1,17 @@
-import { Choice, Question } from "./definitions";
+"use server";
+
+import { Question } from "./definitions";
 import { sql } from "@vercel/postgres";
 
 export async function fetchQuestions() {
   try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
+    const questions = await sql<Question>`SELECT questions.*, json_agg(choices.choice) AS choices_array 
+           FROM questions 
+           LEFT JOIN choices ON questions.id = choices.question_id
+           GROUP BY questions.id;
+           `;
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const questions = await sql<Question>`SELECT * FROM questions`;
-
-    const choices = await sql<Choice>`SELECT * FROM choices`;
-
-    // const q_rows = questions.rows;
-
-    // todo join questions and choices
-
-    console.log("Questions fetched ", questions);
-    console.log("Choices fetched ", choices);
+    // console.log("Questions fetched ", questions.rows);
 
     return questions.rows;
   } catch (error) {

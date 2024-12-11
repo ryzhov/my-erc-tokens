@@ -1,9 +1,11 @@
-import VotingRadio from "./_components/VotingRadio";
+import { fetchQuestions } from "../lib/data";
+import VotingForm from "./_components/VotingForm";
 
-export default function Page() {
+export default async function Page() {
+  const questions = await fetchQuestions();
   return (
     <>
-      <VotingRadio />
+      <VotingForm question={questions[0]} />
     </>
   );
 }
