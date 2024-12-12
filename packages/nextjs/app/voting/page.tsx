@@ -5,7 +5,7 @@ export default async function Page() {
   const questions = await fetchQuestions();
   return (
     <>
-      <VotingForm question={questions[0]} />
+      <VotingForm question={questions[2]} />
     </>
   );
 }
