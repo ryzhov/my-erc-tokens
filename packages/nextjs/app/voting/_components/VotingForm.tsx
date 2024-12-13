@@ -16,6 +16,7 @@ export default function VotingForm({ question }: { question: Question }) {
         ))}
         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-4 rounded">Submit</button>
       </div>
+      <input className="invisible" name="question" value={question.question}></input>
     </form>
   );
 }
