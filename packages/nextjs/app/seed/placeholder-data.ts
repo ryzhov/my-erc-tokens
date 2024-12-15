@@ -1,12 +1,3 @@
-const shareholders = [
-  {
-    id: "410544b2-4001-4271-9855-fec4b6a6442a",
-    name: "User",
-    email: "user@nextmail.com",
-    password: "123456",
-  },
-];
-
 const questions = [
   {
     id: "d6e15727-9fe1-4961-8c5b-ea44a9bd81a0",
@@ -65,12 +56,11 @@ const question_choices = [
 
 const shareholder_question_answers = [
   {
-    id: "d6e15727-9fe1-4961-8c5b-ea44a9bd8107",
-    sh_id: shareholders[0].id,
+    sh_id: "0x9eCf5353F6F09fac45F748E891EBC83095bbeAf8",
     q_id: question_choices[0].id,
     choice_id: question_choices[0].id,
     answer_time: "2024-12-8 12-34",
   },
 ];
 
-export { shareholders, questions, question_choices, shareholder_question_answers };
+export { questions, question_choices, shareholder_question_answers };

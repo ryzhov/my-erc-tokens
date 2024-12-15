@@ -1,34 +1,7 @@
-import { question_choices, questions, shareholder_question_answers, shareholders } from "./placeholder-data";
-import { sha256 } from "@noble/hashes/sha2";
-import { bytesToHex } from "@noble/hashes/utils";
+import { question_choices, questions, shareholder_question_answers } from "./placeholder-data";
 import { db } from "@vercel/postgres";
 
 const client = await db.connect();
-
-async function seedShareholders() {
-  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS shareholders (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
-    );
-  `;
-
-  const insertedShareholders = await Promise.all(
-    shareholders.map(async sholder => {
-      const hashedPassword = bytesToHex(sha256(sholder.password));
-      return client.sql`
-        INSERT INTO shareholders (id, name, email, password)
-        VALUES (${sholder.id}, ${sholder.name}, ${sholder.email}, ${hashedPassword})
-        ON CONFLICT (id) DO NOTHING;
-      `;
-    }),
-  );
-
-  return insertedShareholders;
-}
 
 async function seedQuestions() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -36,7 +9,7 @@ async function seedQuestions() {
   await client.sql`
     CREATE TABLE IF NOT EXISTS questions (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      question VARCHAR(255) NOT NULL,
+      question TEXT NOT NULL,
       is_active INT NOT NULL
     );
   `;
@@ -84,9 +57,9 @@ async function seedShareholderAnswers() {
   await client.sql`
     CREATE TABLE IF NOT EXISTS answers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      sh_id UUID NOT NULL,
+      sh_id VARCHAR(255) NOT NULL,
       question_id UUID NOT NULL,
-      choice_id VARCHAR(255) NOT NULL,
+      choice_id UUID NOT NULL,
       answer_time TIMESTAMP NOT NULL
     );
   `;
@@ -94,14 +67,18 @@ async function seedShareholderAnswers() {
   const insertedAnswers = await Promise.all(
     shareholder_question_answers.map(
       answer => client.sql`
-        INSERT INTO answers (id, sh_id, question_id, choice_id, answer_time)
-        VALUES (${answer.id}, ${answer.sh_id}, ${answer.q_id}, ${answer.choice_id}, now() )
+        INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
+        VALUES (${answer.sh_id}, ${answer.q_id}, ${answer.choice_id}, now() )
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
   );
 
   return insertedAnswers;
+}
+
+async function clearTables() {
+  await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers;`;
 }
 
 export async function GET() {
@@ -111,7 +88,7 @@ export async function GET() {
   // });
   try {
     await client.sql`BEGIN`;
-    await seedShareholders();
+    await clearTables();
     await seedQuestions();
     await seedChoices();
     await seedShareholderAnswers();

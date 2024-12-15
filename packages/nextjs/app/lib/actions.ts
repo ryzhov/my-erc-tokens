@@ -15,15 +15,14 @@ export default async function createAnswer(formData: FormData) {
     question: formData.get("question"),
     answer: formData.get("radio-0"),
   };
-  // todo get id for current user address:
-  const sh_id = "d6e15727-9fe1-4961-8c5b-ea44a9bd8100";
+
   const cookieStore = await cookies();
-  const connectedAddress = cookieStore.get(connectedAddressKey);
-  console.log(rawFormData, connectedAddress?.value);
+  const connectedAddress = cookieStore.get(connectedAddressKey)?.value;
+  console.log(rawFormData, connectedAddress);
 
   await sql`
     INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
-    VALUES (${sh_id}, ${rawFormData.question?.toString()}, ${rawFormData.answer?.toString()}, now())
+    VALUES (${connectedAddress}, ${rawFormData.question?.toString()}, ${rawFormData.answer?.toString()}, now())
   `;
   redirect("/voting/results");
 }
