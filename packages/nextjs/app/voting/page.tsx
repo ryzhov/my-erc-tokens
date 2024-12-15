@@ -12,7 +12,7 @@ export default async function Page() {
   if (connectedAddress) {
     return (
       <>
-        <VotingForm question={questions[2]} address={connectedAddress} />
+        <VotingForm question={questions[2]} />
       </>
     );
   } else
