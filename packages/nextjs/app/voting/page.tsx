@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { fetchQuestions } from "../lib/data";
+import { fetchQuestions } from "../lib/actions";
 import { connectedAddressKey } from "../lib/definitions";
 import VotingForm from "./_components/VotingForm";
 

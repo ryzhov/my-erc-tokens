@@ -1,4 +1,4 @@
-import createAnswer from "~~/app/lib/actions";
+import { createAnswer } from "~~/app/lib/actions";
 import { Question } from "~~/app/lib/definitions";
 
 export default function VotingForm({ question }: { question: Question }) {
