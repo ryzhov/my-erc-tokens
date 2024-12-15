@@ -43,3 +43,11 @@ export async function fetchQuestions() {
     throw new Error("Failed to fetch data.");
   }
 }
+
+export async function fetchVotingResult(question: string) {
+  console.log(question);
+  return [
+    { choice: "Yes", score: 90 },
+    { choice: "No", score: 10 },
+  ];
+}
