@@ -1,3 +1,5 @@
+export const connectedAddressKey = "scaffoldEth2.address";
+
 export type Question = {
   id: string;
   question: string;
