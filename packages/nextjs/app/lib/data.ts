@@ -5,7 +5,7 @@ import { sql } from "@vercel/postgres";
 
 export async function fetchQuestions() {
   try {
-    const questions = await sql<Question>`SELECT questions.*, json_agg(choices.choice) AS choices_array 
+    const questions = await sql<Question>`SELECT questions.*, json_agg(choices) AS choices_array 
            FROM questions 
            LEFT JOIN choices ON questions.id = choices.question_id
            GROUP BY questions.id;
