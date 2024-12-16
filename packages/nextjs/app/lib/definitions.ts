@@ -20,3 +20,8 @@ export type Answer = {
   choice: string;
   answer_time: string;
 };
+
+export type Result = {
+  choice: string;
+  score: number;
+};

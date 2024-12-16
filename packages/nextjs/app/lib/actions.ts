@@ -1,13 +1,29 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { Question, connectedAddressKey } from "./definitions";
 import { sql } from "@vercel/postgres";
 
 export async function setAddressCookie(address: string) {
   const cookieStore = await cookies();
   cookieStore.set(connectedAddressKey, address);
+}
+
+export async function fetchQuestions() {
+  try {
+    const questions = await sql<Question>`SELECT questions.*, json_agg(choices) AS choices_array 
+           FROM questions 
+           LEFT JOIN choices ON questions.id = choices.question_id
+           GROUP BY questions.id;
+           `;
+
+    // console.log("Questions fetched ", questions.rows);
+    return questions.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch data.");
+  }
 }
 
 export async function createAnswer(formData: FormData) {
@@ -24,30 +40,29 @@ export async function createAnswer(formData: FormData) {
     INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
     VALUES (${connectedAddress}, ${rawFormData.question?.toString()}, ${rawFormData.answer?.toString()}, now())
   `;
-  redirect("/voting/results");
+
+  revalidatePath("/voting");
 }
 
-export async function fetchQuestions() {
+export async function fetchVotingResult(q_id: string) {
   try {
-    const questions = await sql<Question>`SELECT questions.*, json_agg(choices) AS choices_array 
-           FROM questions 
-           LEFT JOIN choices ON questions.id = choices.question_id
-           GROUP BY questions.id;
-           `;
-
-    // console.log("Questions fetched ", questions.rows);
-
-    return questions.rows;
+    // 1 select all answers for this question from db
+    const answers = await sql`SELECT * FROM answers WHERE question_id=${q_id} ORDER BY answer_time DESC LIMIT 1`;
+    console.log(answers.rows);
+    const choices = await sql`SELECT * FROM choices WHERE question_id=${q_id}`;
+    console.log(choices.rows);
+    // 2 get token balances for all voted users from blockchain
+    const tokenBalance = 10;
+    const totalTokens = 100;
+    // 3 compute scores and return
+    choices.rows.forEach(element => {
+      element.score = 0;
+      if (element.id == answers.rows[0].choice_id) {
+        element.score = (tokenBalance / totalTokens) * 100;
+      }
+    });
+    return choices.rows;
   } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch data.");
+    return [];
   }
-}
-
-export async function fetchVotingResult(question: string) {
-  console.log(question);
-  return [
-    { choice: "Yes", score: 90 },
-    { choice: "No", score: 10 },
-  ];
 }
