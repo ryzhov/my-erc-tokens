@@ -27,42 +27,42 @@ export async function fetchQuestions() {
 }
 
 export async function createAnswer(formData: FormData) {
-  const rawFormData = {
-    question: formData.get("question"),
-    answer: formData.get("radio-0"),
-  };
+  const question_id = formData.get("question")?.toString();
+  const choice_id = formData.get("radio-0")?.toString();
 
   const cookieStore = await cookies();
   const connectedAddress = cookieStore.get(connectedAddressKey)?.value;
-  console.log(rawFormData, connectedAddress);
 
-  await sql`
-    INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
-    VALUES (${connectedAddress}, ${rawFormData.question?.toString()}, ${rawFormData.answer?.toString()}, now())
-  `;
+  if (connectedAddress && question_id && choice_id) {
+    console.log(connectedAddress);
+    try {
+      await sql`
+      INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
+      VALUES (${connectedAddress}, ${question_id}, ${choice_id}, now())
+    `;
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
+    await updateResults(choice_id);
+  }
 
   revalidatePath("/voting");
 }
 
 export async function fetchVotingResult(q_id: string) {
+  const result = await sql`SELECT * FROM choices WHERE question_id=${q_id}`;
+  return result.rows;
+}
+
+async function updateResults(choice_id: string) {
   try {
-    // 1 select all answers for this question from db
-    const answers = await sql`SELECT * FROM answers WHERE question_id=${q_id} ORDER BY answer_time DESC LIMIT 1`;
-    console.log(answers.rows);
-    const choices = await sql`SELECT * FROM choices WHERE question_id=${q_id}`;
-    console.log(choices.rows);
-    // 2 get token balances for all voted users from blockchain
     const tokenBalance = 10;
     const totalTokens = 100;
-    // 3 compute scores and return
-    choices.rows.forEach(element => {
-      element.score = 0;
-      if (element.id == answers.rows[0].choice_id) {
-        element.score = (tokenBalance / totalTokens) * 100;
-      }
-    });
-    return choices.rows;
+    const vote_score = (tokenBalance / totalTokens) * 100;
+    await sql`UPDATE choices SET score = score + ${vote_score} WHERE id=${choice_id}`;
   } catch (error) {
-    return [];
+    console.log(error);
   }
 }

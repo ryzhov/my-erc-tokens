@@ -34,15 +34,16 @@ async function seedChoices() {
     CREATE TABLE IF NOT EXISTS choices (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       question_id UUID NOT NULL,
-      choice TEXT NOT NULL
+      choice TEXT NOT NULL,
+      score NUMERIC DEFAULT 0
     );
   `;
 
   const insertedChoices = await Promise.all(
     question_choices.map(
       choice => client.sql`
-        INSERT INTO choices (id, question_id, choice)
-        VALUES (${choice.id}, ${choice.question_id}, ${choice.text} )
+        INSERT INTO choices (id, question_id, choice, score)
+        VALUES (${choice.id}, ${choice.question_id}, ${choice.text}, ${0})
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
@@ -77,22 +78,9 @@ async function seedShareholderAnswers() {
   return insertedAnswers;
 }
 
-async function seedResults() {
-  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
-  await client.sql`
-    CREATE TABLE IF NOT EXISTS results (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      question_id UUID NOT NULL,
-      choice_id UUID NOT NULL,
-      score NUMERIC DEFAULT 0.00
-    );
-  `;
-}
-
 async function clearTables() {
   try {
-    await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers, results;`;
+    await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers;`;
   } catch (error) {
     console.log(error);
   }
@@ -109,7 +97,6 @@ export async function GET() {
     await seedQuestions();
     await seedChoices();
     await seedShareholderAnswers();
-    await seedResults();
     await client.sql`COMMIT`;
 
     return Response.json({ message: "Database seeded successfully" });

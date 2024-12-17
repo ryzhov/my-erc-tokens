@@ -7,7 +7,7 @@ export default async function VotingResults({ q_id }: { q_id: string }) {
       <div className="m-4">
         <h1>Voting results</h1>
         {votingResult.map(result => (
-          <div key={result.score}>
+          <div key={result.choice}>
             <span>{result.choice} - </span>
             <span>{result.score} %</span>
           </div>

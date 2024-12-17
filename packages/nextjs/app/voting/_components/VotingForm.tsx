@@ -6,8 +6,8 @@ export default function VotingForm({ question }: { question: Question }) {
     <form action={createAnswer}>
       <div className="items-left m-8">
         {question.choices_array.map(choice => (
-          <div className="flex items-center my-4" key={choice.choice}>
-            <label className="label cursor-pointer ms-2">
+          <div className="flex items-center my-4" key={choice.id}>
+            <label className="label ms-2">
               <input type="radio" name="radio-0" value={choice.id} className="radio checked:bg-red-500" />
               <span className="ms-2">{choice.choice}</span>
             </label>
