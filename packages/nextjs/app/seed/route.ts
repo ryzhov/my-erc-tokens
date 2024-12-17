@@ -77,8 +77,25 @@ async function seedShareholderAnswers() {
   return insertedAnswers;
 }
 
+async function seedResults() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS results (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      question_id UUID NOT NULL,
+      choice_id UUID NOT NULL,
+      score NUMERIC DEFAULT 0.00
+    );
+  `;
+}
+
 async function clearTables() {
-  await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers;`;
+  try {
+    await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers, results;`;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export async function GET() {
@@ -92,6 +109,7 @@ export async function GET() {
     await seedQuestions();
     await seedChoices();
     await seedShareholderAnswers();
+    await seedResults();
     await client.sql`COMMIT`;
 
     return Response.json({ message: "Database seeded successfully" });
