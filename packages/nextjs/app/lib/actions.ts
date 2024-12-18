@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { abi } from "./abi";
+import { publicClient } from "./client";
 import { Question, connectedAddressKey } from "./definitions";
 import { sql } from "@vercel/postgres";
 
@@ -58,6 +60,18 @@ export async function fetchVotingResult(q_id: string) {
 
 async function updateResults(choice_id: string) {
   try {
+    const cookieStore = await cookies();
+    const connectedAddress = cookieStore.get(connectedAddressKey)?.value;
+
+    const data = await publicClient.readContract({
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      abi: abi,
+      functionName: "balanceOf",
+      args: [connectedAddress],
+    });
+
+    console.log(data, "blockchain data");
+
     const tokenBalance = 10;
     const totalTokens = 100;
     const vote_score = (tokenBalance / totalTokens) * 100;
