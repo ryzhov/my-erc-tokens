@@ -1,21 +1,9 @@
-"use client";
-
-import { useEffect } from "react";
 import Link from "next/link";
-import { setAddressCookie } from "./lib/actions";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon, StarIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-
-  useEffect(() => {
-    if (connectedAddress) {
-      setAddressCookie(connectedAddress);
-    }
-  }, [connectedAddress]);
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
@@ -26,7 +14,7 @@ const Home: NextPage = () => {
           </h1>
           <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
             <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
+            <Address />
           </div>
         </div>
 

@@ -6,8 +6,9 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Address as AddressType, getAddress, isAddress } from "viem";
 import { hardhat } from "viem/chains";
 import { normalize } from "viem/ens";
-import { useEnsAvatar, useEnsName } from "wagmi";
+import { useAccount, useEnsAvatar, useEnsName } from "wagmi";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
+import { setAddressCookie } from "~~/app/lib/actions";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
@@ -32,7 +33,8 @@ const blockieSizeMap = {
 /**
  * Displays an address (or ENS) with a Blockie image and option to copy address.
  */
-export const Address = ({ address, disableAddressLink, format, size = "base" }: AddressProps) => {
+export const Address = ({ disableAddressLink, format, size = "base" }: AddressProps) => {
+  const address = useAccount().address;
   const [ens, setEns] = useState<string | null>();
   const [ensAvatar, setEnsAvatar] = useState<string | null>();
   const [addressCopied, setAddressCopied] = useState(false);
@@ -64,6 +66,12 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   useEffect(() => {
     setEnsAvatar(fetchedEnsAvatar);
   }, [fetchedEnsAvatar]);
+
+  useEffect(() => {
+    if (address) {
+      setAddressCookie(address);
+    }
+  }, [address]);
 
   // Skeleton UI
   if (!checkSumAddress) {
