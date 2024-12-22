@@ -11,6 +11,7 @@ export type Choice = {
   id: string;
   choice: string;
   question_id: string;
+  score: number;
 };
 
 export type Answer = {

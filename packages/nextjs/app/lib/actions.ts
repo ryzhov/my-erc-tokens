@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { abi } from "./abi";
 import { publicClient } from "./client";
-import { Question, connectedAddressKey } from "./definitions";
+import { Choice, Question, connectedAddressKey } from "./definitions";
 import { sql } from "@vercel/postgres";
 
 export async function setAddressCookie(address: string) {
@@ -54,7 +54,7 @@ export async function createAnswer(formData: FormData) {
 }
 
 export async function fetchVotingResult(q_id: string) {
-  const result = await sql`SELECT * FROM choices WHERE question_id=${q_id}`;
+  const result = await sql<Choice>`SELECT * FROM choices WHERE question_id=${q_id}`;
   return result.rows;
 }
 
