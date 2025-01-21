@@ -1,12 +1,14 @@
-import { fetchVotingResult } from "~~/app/lib/actions";
+import { Choice } from "~~/app/lib/definitions";
 
-export default async function VotingResults({ q_id }: { q_id: string }) {
-  const votingResult = await fetchVotingResult(q_id);
+type VotingResultsProps = {
+  voting_result: Choice[];
+};
+
+export default async function VotingResults(props: VotingResultsProps) {
   return (
     <>
       <div className="m-4">
-        <h1>Voting results</h1>
-        {votingResult.map(result => (
+        {props.voting_result.map(result => (
           <div key={result.choice}>
             <span>{result.choice} - </span>
             <span>{result.score} %</span>
