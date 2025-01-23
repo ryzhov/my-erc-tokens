@@ -20,26 +20,26 @@ Git репозиторий будет инициализирован автом�
 По завершению должна появиться надпись 
 ```
   Congratulations! Your project has been scaffolded! 🎉
-
-  Next steps:
-
-  cd voting-app
-
-        Start the local development node
-        yarn chain
-
-        In a new terminal window, deploy your contracts
-        yarn deploy
-
-        In a new terminal window, start the frontend
-        yarn start
-
-  Thanks for using Scaffold-ETH 2 🙏, Happy Building!
 ``` 
+## 2 Разработка пользовательского интерфейса для голосования 
 
-## 2 Разработка моделей данных и наполнение таблиц SQL 
+На главной странице добавим карточку, которая будет вести на страницу голосования. 
 
-## 3 Разработка пользовательского интерфейса для голосования 
+```html
+<div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
+  <StarIcon className="h-8 w-8 fill-secondary" />
+  <p>
+    <Link href="/voting" passHref className="link">
+      Vote
+    </Link>{" "}
+    to make the company successful.
+  </p>
+</div>
+```
+
+
+
+## 3 Разработка моделей данных и наполнение таблиц SQL 
 
 ## 4 Подключение блокчейна на сервере
 
