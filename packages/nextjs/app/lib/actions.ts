@@ -28,6 +28,24 @@ export async function fetchQuestions() {
   }
 }
 
+export async function fetchQuestionById(q_id: string) {
+  console.log("fetching question by id", q_id);
+  try {
+    const questions = await sql<Question>`SELECT questions.*, json_agg(choices.*) AS choices_array 
+           FROM questions 
+           LEFT JOIN choices ON questions.id = choices.question_id
+           WHERE questions.id = ${q_id}
+           GROUP BY questions.id;
+           `;
+
+    console.log("Questions fetched ", questions.rows);
+    return questions.rows[0];
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch data.");
+  }
+}
+
 export async function createAnswer(formData: FormData) {
   const question_id = formData.get("question")?.toString();
   const choice_id = formData.get("radio-0")?.toString();

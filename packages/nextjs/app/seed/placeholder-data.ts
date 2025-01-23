@@ -6,7 +6,7 @@ const questions = [
   },
   {
     id: "d6e15727-9fe1-4961-8c5b-ea44a9bd81a1",
-    question: "Who will be Chief Executive Officer in 2025?",
+    question: "Who should be Chief Executive Officer in 2025?",
     is_active: 1,
   },
   {
