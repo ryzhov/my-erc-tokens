@@ -81,18 +81,24 @@ async function updateResults(choice_id: string) {
     const cookieStore = await cookies();
     const connectedAddress = cookieStore.get(connectedAddressKey)?.value;
 
-    const data = await publicClient.readContract({
+    const tokenBalance = await publicClient.readContract({
       address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: abi,
       functionName: "balanceOf",
       args: [connectedAddress],
     });
 
-    console.log(data, "blockchain data");
+    const totalSupply = await publicClient.readContract({
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      abi: abi,
+      functionName: "totalSupply",
+    });
 
-    const tokenBalance = 10;
-    const totalTokens = 100;
-    const vote_score = (tokenBalance / totalTokens) * 100;
+    console.log("blockchain tokenBalance: ", tokenBalance, "totalSupply: ", totalSupply);
+    const tokenBalanceInNumber = parseInt(tokenBalance as string, 10);
+    const totalSupplyInNumber = parseInt(totalSupply as string, 10);
+
+    const vote_score = (tokenBalanceInNumber / totalSupplyInNumber) * 100;
     await sql`UPDATE choices SET score = score + ${vote_score} WHERE id=${choice_id}`;
   } catch (error) {
     console.log(error);
