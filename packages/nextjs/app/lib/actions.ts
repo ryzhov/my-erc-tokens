@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { abi } from "./abi";
 import { publicClient } from "./client";
-import { Choice, Question, connectedAddressKey } from "./definitions";
+import { Answer, Choice, Question, Result, connectedAddressKey } from "./definitions";
 import { sql } from "@vercel/postgres";
 
 export async function setAddressCookie(address: string) {
@@ -43,24 +43,62 @@ export async function fetchQuestionById(q_id: string) {
   }
 }
 
-export async function createAnswer(formData: FormData) {
-  const questionId = formData.get("question")?.toString();
-  const choiceId = formData.get("choice")?.toString();
-  const address = formData.get("address")?.toString();
+export async function fetchAnswer(questionId: string, shareholderId: string) {
+  console.log(`fetching answer by questionId: ${questionId} and shareholderId: ${shareholderId}`);
+  try {
+    const answers = await sql<Answer>`SELECT * FROM answers 
+      WHERE question_id = ${questionId}
+      AND sh_id = ${shareholderId}`;
 
-  if (address && questionId && choiceId) {
-    try {
-      const weight = await fetchWeight(address);
+    return answers.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch data.");
+  }
+}
 
-      await sql`
+export async function fetchVoteResult(questionId: string) {
+  console.log(`fetching results by questionId: ${questionId}`);
+  try {
+    const answers = await sql<Result>`
+      SELECT answers.choice_id, choices.choice, sum(answers.weight) as weight FROM answers
+      INNER JOIN choices ON answers.choice_id = choices.id
+      WHERE answers.question_id = ${questionId}
+      GROUP BY answers.choice_id, choices.choice
+    `;
+
+    return answers.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch data.");
+  }
+}
+
+export async function createAnswer({
+  questionId,
+  choiceId,
+  address,
+}: {
+  questionId: string;
+  choiceId: string;
+  address: string;
+}) {
+  const result = { success: false, error: "" };
+
+  try {
+    const weight = await fetchWeight(address);
+
+    await sql`
       INSERT INTO answers (sh_id, question_id, choice_id, answer_time, weight)
       VALUES (${address}, ${questionId}, ${choiceId}, now(), ${weight})
     `;
-    } catch (error) {
-      console.log(error);
-      return;
-    }
+    result.success = true;
+  } catch (error) {
+    console.log(error);
+    result.error = JSON.stringify(error);
   }
+
+  return result;
 }
 
 export async function fetchChoices(q_id: string) {

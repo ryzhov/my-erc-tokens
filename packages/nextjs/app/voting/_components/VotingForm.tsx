@@ -1,20 +1,20 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { createAnswer } from "~~/app/lib/actions";
-import { Question } from "~~/app/lib/definitions";
+import { Choice } from "~~/app/lib/definitions";
 
 type VotingFormProps = {
-  question: Question;
-  address: string;
+  choices: Choice[];
+  onSubmit: any;
 };
 
-export const VotingForm = ({ question: { id, choices_array: choices }, address }: VotingFormProps) => {
+export const VotingForm = ({ choices, onSubmit }: VotingFormProps) => {
   const [choiceId, setChoiceId] = useState("");
   const onChoiceChanged = (e: ChangeEvent<HTMLInputElement>) => setChoiceId(e.target.value);
+  const handleSubmit = (formData: FormData) => onSubmit(formData.get("choice"));
 
   return (
-    <form action={createAnswer}>
+    <form action={handleSubmit}>
       <div className="m-2">
         {choices.map(({ id, choice }) => (
           <div key={id}>
@@ -26,6 +26,7 @@ export const VotingForm = ({ question: { id, choices_array: choices }, address }
                   value={id}
                   onChange={onChoiceChanged}
                   checked={choiceId === id}
+                  required={true}
                   className="radio checked:bg-red-500"
                 />
                 <span className="ms-2">{choice}</span>
@@ -33,10 +34,13 @@ export const VotingForm = ({ question: { id, choices_array: choices }, address }
             </div>
           </div>
         ))}
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded">Submit</button>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
+          disabled={!choiceId}
+        >
+          {choiceId ? "Vote!" : "Make your choice"}
+        </button>
       </div>
-      <input className="hidden" name="question" value={id} readOnly></input>
-      <input className="hidden" name="address" value={address} readOnly></input>
     </form>
   );
 };

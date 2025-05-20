@@ -1,21 +1,24 @@
-import { Choice } from "~~/app/lib/definitions";
+import { Result } from "~~/app/lib/definitions";
 
 type VotingResultsProps = {
-  choices: Choice[];
+  results: Array<Result>;
 };
 
-export default async function VotingResults(props: VotingResultsProps) {
-  console.log("VotingResults::props =>", props);
+function VotingResults({ results }: VotingResultsProps) {
+  console.log("VotingResults::results =>", results);
   return (
     <>
       <div className="m-4">
-        {props.choices.map(result => (
-          <div key={result.choice}>
-            <span>{result.choice} - </span>
-            <span>{result.score} %</span>
+        {results.map(({ choice_id, choice, weight }) => (
+          <div key={choice_id}>
+            <span>
+              {choice} - {weight}%
+            </span>
           </div>
         ))}
       </div>
     </>
   );
 }
+
+export default VotingResults;

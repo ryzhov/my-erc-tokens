@@ -11,18 +11,19 @@ export type Choice = {
   id: string;
   choice: string;
   question_id: string;
-  score: number;
 };
 
 export type Answer = {
   id: string;
-  shareholder_id: string;
-  question: string;
-  choice: string;
+  sh_id: string;
+  question_id: string;
+  choice_id: string;
   answer_time: string;
+  weight: number;
 };
 
 export type Result = {
+  choice_id: string;
   choice: string;
-  score: number;
+  weight: number;
 };
