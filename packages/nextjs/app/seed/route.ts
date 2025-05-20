@@ -1,4 +1,4 @@
-import { question_choices, questions, shareholder_question_answers } from "./placeholder-data";
+import { question_choices, questions } from "./placeholder-data";
 import { db } from "@vercel/postgres";
 
 const client = await db.connect();
@@ -14,7 +14,7 @@ async function seedQuestions() {
     );
   `;
 
-  const insertedQuestions = await Promise.all(
+  return await Promise.all(
     questions.map(
       question => client.sql`
         INSERT INTO questions (id, question, is_active)
@@ -23,8 +23,6 @@ async function seedQuestions() {
       `,
     ),
   );
-
-  return insertedQuestions;
 }
 
 async function seedChoices() {
@@ -34,22 +32,19 @@ async function seedChoices() {
     CREATE TABLE IF NOT EXISTS choices (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       question_id UUID NOT NULL,
-      choice TEXT NOT NULL,
-      score NUMERIC DEFAULT 0
+      choice TEXT NOT NULL
     );
   `;
 
-  const insertedChoices = await Promise.all(
+  return await Promise.all(
     question_choices.map(
       choice => client.sql`
-        INSERT INTO choices (id, question_id, choice, score)
-        VALUES (${choice.id}, ${choice.question_id}, ${choice.text}, ${0})
+        INSERT INTO choices (id, question_id, choice)
+        VALUES (${choice.id}, ${choice.question_id}, ${choice.text})
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
   );
-
-  return insertedChoices;
 }
 
 async function seedShareholderAnswers() {
@@ -61,26 +56,26 @@ async function seedShareholderAnswers() {
       sh_id VARCHAR(255) NOT NULL,
       question_id UUID NOT NULL,
       choice_id UUID NOT NULL,
-      answer_time TIMESTAMP NOT NULL
+      answer_time TIMESTAMP NOT NULL,
+      weight INT NOT NULL,
+      CONSTRAINT unique_answer UNIQUE (sh_id, question_id)
     );
   `;
 
-  const insertedAnswers = await Promise.all(
-    shareholder_question_answers.map(
-      answer => client.sql`
-        INSERT INTO answers (sh_id, question_id, choice_id, answer_time)
-        VALUES (${answer.sh_id}, ${answer.q_id}, ${answer.choice_id}, now() )
-        ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
-  );
-
-  return insertedAnswers;
+  //return await Promise.all(
+  //  shareholder_question_answers.map(
+  //    answer => client.sql`
+  //      INSERT INTO answers (sh_id, question_id, choice_id, answer_time, weight)
+  //      VALUES (${answer.sh_id}, ${answer.q_id}, ${answer.choice_id}, now(), ${answer.weight})
+  //      ON CONFLICT (id) DO NOTHING;
+  //    `,
+  //  ),
+  //);
 }
 
 async function clearTables() {
   try {
-    await client.sql`DROP TABLE IF EXISTS shareholders, questions, choices, answers;`;
+    await client.sql`DROP TABLE IF EXISTS questions, choices, answers;`;
   } catch (error) {
     console.log(error);
   }

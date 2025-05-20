@@ -1,14 +1,15 @@
 import { Choice } from "~~/app/lib/definitions";
 
 type VotingResultsProps = {
-  voting_result: Choice[];
+  choices: Choice[];
 };
 
 export default async function VotingResults(props: VotingResultsProps) {
+  console.log("VotingResults::props =>", props);
   return (
     <>
       <div className="m-4">
-        {props.voting_result.map(result => (
+        {props.choices.map(result => (
           <div key={result.choice}>
             <span>{result.choice} - </span>
             <span>{result.score} %</span>

@@ -60,6 +60,7 @@ const shareholder_question_answers = [
     q_id: question_choices[0].id,
     choice_id: question_choices[0].id,
     answer_time: "2024-12-8 12-34",
+    weight: 42,
   },
 ];
 
